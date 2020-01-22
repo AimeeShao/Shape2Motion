@@ -18,6 +18,8 @@ sys.path.append(os.path.join(ROOT_DIR, 'utils'))
 import provider
 import tf_util
 import scipy.io as sio
+
+# parse the arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', type=int, default=2, help='GPU to use [default: GPU 0]')
 parser.add_argument('--model', default='model', help='Model name [default: model]')
@@ -34,6 +36,7 @@ parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate fo
 parser.add_argument('--stage',type=int,default=2,help='network stage')
 FLAGS = parser.parse_args()
 
+# training params
 EPOCH_CNT = 0
 BATCH_SIZE = FLAGS.batch_size
 NUM_POINT = FLAGS.num_point
@@ -46,8 +49,11 @@ DECAY_STEP = FLAGS.decay_step
 DECAY_RATE = FLAGS.decay_rate
 STAGE = FLAGS.stage
 
+# import the model
 MODEL = importlib.import_module(FLAGS.model) # import network module
 MODEL_FILE = os.path.join(ROOT_DIR, 'models', FLAGS.model+'.py')
+
+# set up logs
 if STAGE == 1:
     LOG_DIR = FLAGS.stage_1_log_dir
 else:
@@ -63,6 +69,7 @@ BN_DECAY_DECAY_RATE = 0.5
 BN_DECAY_DECAY_STEP = float(DECAY_STEP)
 BN_DECAY_CLIP = 0.99
 
+# connect to network?
 HOSTNAME = socket.gethostname()
 
 def log_string(out_str):
@@ -114,7 +121,7 @@ def train():
                 batch_stage_1 = tf.Variable(0,name='stage1/batch')
                 bn_decay = get_bn_decay(batch_stage_1)
                 tf.summary.scalar('bn_decay', bn_decay)
-                print "--- Get model and loss"
+                print("--- Get model and loss")
                 # Get model and loss 
                 end_points,dof_feat,simmat_feat = MODEL.get_feature(pointclouds_pl, is_training_pl,STAGE,bn_decay=bn_decay)
                 pred_labels_key_p,pred_labels_direction,pred_regression_direction,\
@@ -136,7 +143,7 @@ def train():
                 tf.summary.scalar('labels_type_acc', task_4_acc)
                 tf.summary.scalar('loss', loss)
 
-                print "--- Get training operator"
+                print("--- Get training operator")
                 # Get training operator
                 learning_rate = get_learning_rate(batch_stage_1)
                 tf.summary.scalar('learning_rate', learning_rate)
@@ -158,13 +165,13 @@ def train():
                 batch_stage_2 = tf.Variable(0,name='stage2/batch_2')
                 bn_decay = get_bn_decay(batch_stage_2)
                 tf.summary.scalar('bn_decay', bn_decay)
-                print "--- Get model and loss"
+                print("--- Get model and loss")
                 # Get model and loss 
                 end_points,dof_feat,simmat_feat = MODEL.get_feature(pointclouds_pl, is_training_feature,STAGE,bn_decay=bn_decay)
                 pred_dof_score,all_feat = MODEL.get_stage_2(dof_feat,simmat_feat,dof_mask_pl,proposal_nx_pl,is_training_pl,bn_decay=bn_decay)
                 loss = MODEL.get_stage_2_loss(pred_dof_score,dof_score_pl,dof_mask_pl)
                 tf.summary.scalar('loss', loss)
-                print "--- Get training operator"
+                print("--- Get training operator")
                 # Get training operator
                 learning_rate = get_learning_rate(batch_stage_2)
                 tf.summary.scalar('learning_rate', learning_rate)
@@ -199,7 +206,7 @@ def train():
             init = tf.global_variables_initializer()
             sess.run(init)
             saver.restore(sess,'./stage_1_log/model100.ckpt')
-	if STAGE==1:
+    if STAGE==1:
             ops = {'pointclouds_pl': pointclouds_pl,
                'labels_key_p': labels_key_p,
                'labels_direction': labels_direction,
@@ -241,19 +248,19 @@ def train():
                     model_ccc_path = "model"+str(epoch)+".ckpt"
                     save_path = saver.save(sess, os.path.join(LOG_DIR, model_ccc_path))
                     log_string("Model saved in file: %s" % save_path)
-        elif STAGE==2:
-            ops = {'pointclouds_pl': pointclouds_pl,
-               'proposal_nx_pl': proposal_nx_pl,
-               'dof_mask_pl': dof_mask_pl,
-               'dof_score_pl': dof_score_pl,
-               'pred_dof_score': pred_dof_score,
-               'is_training_pl': is_training_pl,
-               'loss': loss,
-               'train_op': train_op,
-               'merged': merged,
-               'step': batch_stage_2,
-               'all_feat':all_feat,
-               'end_points': end_points}
+                elif STAGE==2:
+                    ops = {'pointclouds_pl': pointclouds_pl,
+                       'proposal_nx_pl': proposal_nx_pl,
+                       'dof_mask_pl': dof_mask_pl,
+                       'dof_score_pl': dof_score_pl,
+                       'pred_dof_score': pred_dof_score,
+                       'is_training_pl': is_training_pl,
+                       'loss': loss,
+                       'train_op': train_op,
+                       'merged': merged,
+                       'step': batch_stage_2,
+                       'all_feat':all_feat,
+                       'end_points': end_points}
             for epoch in range(MAX_EPOCH):
                 log_string('**** TRAIN EPOCH %03d ****' % (epoch))
                 sys.stdout.flush()

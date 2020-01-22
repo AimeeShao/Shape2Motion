@@ -101,7 +101,7 @@ def train():
             task_1_acc,iou,loss1,loss2,loss = MODEL.get_stage_3_loss(pred_proposal,pred_dof_regression,proposal_pl,dof_regression_pl)
             tf.summary.scalar('loss', loss)
 
-            print "--- Get training operator"
+            print("--- Get training operator")
             # Get training operator
             learning_rate = get_learning_rate(batch)
             tf.summary.scalar('learning_rate', learning_rate)
@@ -111,9 +111,9 @@ def train():
                 optimizer = tf.train.AdamOptimizer(learning_rate)
             train_op = optimizer.minimize(loss, global_step=batch)
             variables = tf.contrib.framework.get_variables_to_restore()
-            print "variables"
+            print("variables")
             for v in variables:
-                print v
+                print(v)
             # Add ops to save and restore all the variables.
             saver = tf.train.Saver(max_to_keep=100)
        
