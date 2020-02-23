@@ -176,7 +176,12 @@ def train():
                 # Get training operator
                 learning_rate = get_learning_rate(batch_stage_2)
                 tf.summary.scalar('learning_rate', learning_rate)
-                variables = tf.contrib.framework.get_variables_to_restore()
+                """ prev code: variables = tf.contrib.framework.get_variables_to_restore()
+                Changed into: """
+                collection = tf.GraphKeys.GLOBAL_VARIABLES
+                variables_superset = tf.get_collection(collection)
+                variables = [v for v in variables_superset]
+                
                 variables_to_resotre = [v for v in variables if v.name.split('/')[0]=='pointnet']
                 variables_to_train = [v for v in variables if v.name.split('/')[0]=='stage2']
                 if OPTIMIZER == 'momentum':
@@ -206,8 +211,8 @@ def train():
         else:
             init = tf.global_variables_initializer()
             sess.run(init)
-            saver.restore(sess,'./stage_1_log/model100.ckpt')
-    if STAGE==1:
+            saver.restore(sess,'./stage_1_log/model4.ckpt')
+        if STAGE==1:
             ops = {'pointclouds_pl': pointclouds_pl,
                'labels_key_p': labels_key_p,
                'labels_direction': labels_direction,
@@ -249,19 +254,19 @@ def train():
                     model_ccc_path = "model"+str(epoch)+".ckpt"
                     save_path = saver.save(sess, os.path.join(LOG_DIR, model_ccc_path))
                     log_string("Model saved in file: %s" % save_path)
-                elif STAGE==2:
-                    ops = {'pointclouds_pl': pointclouds_pl,
-                       'proposal_nx_pl': proposal_nx_pl,
-                       'dof_mask_pl': dof_mask_pl,
-                       'dof_score_pl': dof_score_pl,
-                       'pred_dof_score': pred_dof_score,
-                       'is_training_pl': is_training_pl,
-                       'loss': loss,
-                       'train_op': train_op,
-                       'merged': merged,
-                       'step': batch_stage_2,
-                       'all_feat':all_feat,
-                       'end_points': end_points}
+        elif STAGE==2:
+            ops = {'pointclouds_pl': pointclouds_pl,
+                   'proposal_nx_pl': proposal_nx_pl,
+                   'dof_mask_pl': dof_mask_pl,
+                   'dof_score_pl': dof_score_pl,
+                   'pred_dof_score': pred_dof_score,
+                   'is_training_pl': is_training_pl,
+                   'loss': loss,
+                   'train_op': train_op,
+                   'merged': merged,
+                   'step': batch_stage_2,
+                   'all_feat':all_feat,
+                   'end_points': end_points}
             for epoch in range(MAX_EPOCH):
                 log_string('**** TRAIN EPOCH %03d ****' % (epoch))
                 sys.stdout.flush()
@@ -276,15 +281,15 @@ def train():
 def train_one_epoch_stage_1(sess, ops, train_writer):
     is_training = True
     permutation = np.random.permutation(5)
-    for i in range(len(permutation)/4):
+    for i in range(len(permutation)//4):
         load_data_start_time = time.time();
-        loadpath = './train_data/training_data_'+str(permutation[i*4]+1)+'.mat'
+        loadpath = './data/train_data/training_data_'+str(permutation[i*4]+1)+'.mat'
         train_data = sio.loadmat(loadpath)['Training_data']
         load_data_duration = time.time() - load_data_start_time
         log_string('\t%s: %s load time: %f' % (datetime.now(),loadpath,load_data_duration))
         for j in range(3):
             temp_load_data_start_time = time.time();
-            temp_loadpath = './train_data/training_data_'+str(permutation[i*4+j+1]+1)+'.mat'
+            temp_loadpath = './data/train_data/training_data_'+str(permutation[i*4+j+1]+1)+'.mat'
             temp_train_data = sio.loadmat(temp_loadpath)['Training_data']
             temp_load_data_duration = time.time() - temp_load_data_start_time
             log_string('\t%s: %s load time: %f' % (datetime.now(),temp_loadpath,temp_load_data_duration))
@@ -395,7 +400,7 @@ def train_one_epoch_stage_1(sess, ops, train_writer):
 def train_one_epoch_stage_2(sess, ops, train_writer):
     is_training = True
     permutation = np.random.permutation(328)
-    for i in range(len(permutation)/4):
+    for i in range(len(permutation)//4):
         load_data_start_time = time.time();
         loadpath = './train_data_stage_2/train_stage_2_data_'+str(permutation[i*4]+1)+'.mat'
         train_data = sio.loadmat(loadpath)['Training_data']
