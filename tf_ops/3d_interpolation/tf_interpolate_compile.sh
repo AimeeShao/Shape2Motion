@@ -1,5 +1,5 @@
 CUDA_ROOT=/usr/local/cuda-10.0
-TF_ROOT=/home/atshao/anaconda3/envs/py37/lib/python3.7/site-packages/tensorflow_core
+TF_ROOT=/usr/local/lib/python3.6/dist-packages/tensorflow_core
 
 # TF1.2
 #g++ -std=c++11 tf_interpolate.cpp -o tf_interpolate_so.so -shared -fPIC -I /usr/local/lib/python2.7/dist-packages/tensorflow/include -I /usr/local/cuda-8.0/include -lcudart -L /usr/local/cuda-8.0/lib64/ -O2 -D_GLIBCXX_USE_CXX11_ABI=0
