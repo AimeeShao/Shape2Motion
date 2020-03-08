@@ -3,7 +3,8 @@ import math
 from datetime import datetime
 import h5py
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import socket
 import importlib
 import os
@@ -138,13 +139,13 @@ def train():
 
                 print("--- Get training operator")
                 # Get training operator
-                learning_rate = get_learning_rate(batch)
+                learning_rate = get_learning_rate(batch_stage_1)
                 tf.summary.scalar('learning_rate', learning_rate)
                 if OPTIMIZER == 'momentum':
                     optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=MOMENTUM)
                 elif OPTIMIZER == 'adam':
                     optimizer = tf.train.AdamOptimizer(learning_rate)
-                train_op = optimizer.minimize(loss, global_step=batch)
+                train_op = optimizer.minimize(loss, global_step=batch_stage_1)
             
                 # Add ops to save and restore all the variables.
                 saver = tf.train.Saver(max_to_keep=100)
@@ -251,7 +252,7 @@ def train():
                 log_string('**** TEST EPOCH %03d ****' % (epoch))
                 sys.stdout.flush()
                 eval_one_epoch_stage_1(sess,ops,test_writer)
-        elif STAGE==2:
+    elif STAGE==2:
             ops = {'pointclouds_pl': pointclouds_pl,
                'proposal_nx_pl': proposal_nx_pl,
                'dof_mask_pl': dof_mask_pl,
