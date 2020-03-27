@@ -1,0 +1,7 @@
+/main/test_data
+/main/train_data
+/main/stage_1_log/
+/main/stage_2_log/
+/models/stage_1_log/
+/models/stage_2_log/
+/main/train_stage_1_result/
