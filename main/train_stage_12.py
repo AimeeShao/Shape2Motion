@@ -211,7 +211,7 @@ def train():
         else:
             init = tf.global_variables_initializer()
             sess.run(init)
-            saver.restore(sess,'./stage_1_log/model4.ckpt')
+            saver.restore(sess,'./stage_1_log/model100.ckpt')
         if STAGE==1:
             ops = {'pointclouds_pl': pointclouds_pl,
                'labels_key_p': labels_key_p,
@@ -283,13 +283,13 @@ def train_one_epoch_stage_1(sess, ops, train_writer):
     permutation = np.random.permutation(5)
     for i in range(len(permutation)//4):
         load_data_start_time = time.time();
-        loadpath = './data/train_data/training_data_'+str(permutation[i*4]+1)+'.mat'
+        loadpath = './train_data/training_data_'+str(permutation[i*4]+1)+'.mat'
         train_data = sio.loadmat(loadpath)['Training_data']
         load_data_duration = time.time() - load_data_start_time
         log_string('\t%s: %s load time: %f' % (datetime.now(),loadpath,load_data_duration))
         for j in range(3):
             temp_load_data_start_time = time.time();
-            temp_loadpath = './data/train_data/training_data_'+str(permutation[i*4+j+1]+1)+'.mat'
+            temp_loadpath = './train_data/training_data_'+str(permutation[i*4+j+1]+1)+'.mat'
             temp_train_data = sio.loadmat(temp_loadpath)['Training_data']
             temp_load_data_duration = time.time() - temp_load_data_start_time
             log_string('\t%s: %s load time: %f' % (datetime.now(),temp_loadpath,temp_load_data_duration))
