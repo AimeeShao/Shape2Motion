@@ -1,6 +1,6 @@
 #/bin/bash
 CUDA_ROOT=/usr/local/cuda-10.0
-TF_ROOT=/home/atshao/anaconda3/envs/py37/lib/python3.7/site-packages/tensorflow_core
+TF_ROOT=/usr/local/lib/python3.6/dist-packages/tensorflow_core
 
 ${CUDA_ROOT}/bin/nvcc tf_grouping_g.cu -o tf_grouping_g.cu.o -c -O2 -DGOOGLE_CUDA=1 -x cu -Xcompiler -fPIC
 
